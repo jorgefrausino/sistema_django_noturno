@@ -5,7 +5,9 @@ from .models import Paciente
 # Create your views here.
 @login_required
 def index(request):
-    return render(request, "index.html")
+    pacientes = Paciente.objects.all()
+    return render(request, "index.html",
+    {'pacientes':pacientes})
 
 def novo_paciente(request):
     return render(request, "novo-paciente.html")
@@ -30,3 +32,17 @@ def novo_paciente(request):
 @login_required
 def novo_paciente_sucesso(request):
     return render(request, "novo-paciente-sucesso.html")
+@login_required
+def alterar_paciente(request,codigo_paciente):
+    paciente = Paciente.objects.get(codigo_paciente=codigo_paciente)
+    if request.method == 'POST':
+        paciente.nome = request.POST.get('nome')
+        paciente.cpf = request.POST.get('cpf')
+        paciente.email = request.POST.get('email')
+        paciente.telefone = request.POST.get('telefone')
+        paciente.data_nascimento = request .POST.get('data_nascimento')
+
+        paciente.save()
+
+        return redirect('home')
+    return render(request, "alterar_dados.html", {'paciente':paciente})
