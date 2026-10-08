@@ -6,17 +6,14 @@ from .models import Paciente
 @login_required
 def index(request):
     pacientes = Paciente.objects.all()
-    return render(request, "index.html",
-    {'pacientes':pacientes})
+    return render(request, "index.html", {'pacientes':pacientes})
 
-def novo_paciente(request):
-    return render(request, "novo-paciente.html")
-
+@login_required
 def novo_paciente(request):
     if request.method == 'POST':
         nome = request.POST.get('nome')
         cpf = request.POST.get('cpf')
-        email = request.POST.et('email')
+        email = request.POST.get('email')
         telefone = request.POST.get('telefone')
         data_nascimento = request.POST.get('data_nascimento')
         Paciente.objects.create(
@@ -26,12 +23,13 @@ def novo_paciente(request):
             telefone=telefone,
             data_nascimento=data_nascimento
         )
-        return redirect('index')
+        return redirect('novo_paciente_sucesso')
     return render(request, "novo-paciente.html")
 
 @login_required
 def novo_paciente_sucesso(request):
     return render(request, "novo-paciente-sucesso.html")
+
 @login_required
 def alterar_paciente(request,codigo_paciente):
     paciente = Paciente.objects.get(codigo_paciente=codigo_paciente)
@@ -40,9 +38,23 @@ def alterar_paciente(request,codigo_paciente):
         paciente.cpf = request.POST.get('cpf')
         paciente.email = request.POST.get('email')
         paciente.telefone = request.POST.get('telefone')
-        paciente.data_nascimento = request .POST.get('data_nascimento')
+        paciente.data_nascimento = request.POST.get('data_nascimento')
 
         paciente.save()
 
-        return redirect('home')
+        return redirect('index')
     return render(request, "alterar_dados.html", {'paciente':paciente})
+
+@login_required
+def excluir_paciente(request, codigo_paciente):
+    paciente = Paciente.objects.get(codigo_paciente=codigo_paciente)
+    paciente.delete()
+    return redirect('index')
+
+def buscar_paciente(request):
+    query = request.GET.get('buscar', '')
+    pacientes = Paciente.objects.filter(nome__icontains=query)
+    return render(request, 'index.html', {
+        'pacientes': pacientes,
+        'query': query
+    })
